@@ -1,2 +1,5 @@
-storage/
-images/
+storage/*
+images/*
+
+!storage/.gitkeep
+!images/.gitkeep 
