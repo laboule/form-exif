@@ -69,63 +69,35 @@ function upload_avatar($ph_tmp, $storage_path) // création de la fonction uploa
 	}
 } // fin de creation de fonction
 
-if (isset($_POST['submit'])) //si on appuit sur "s'inscrire" qui a la valeur "submit"
-{
+// Handle Form Submit
+if (isset($_POST["submit"])) {
 
 	$id_annonce = "100";
+	$extensions = array("jpeg", "jpg", "png", "gif");
 
-	if (isset($_POST['ph1-url'])) {
+	if (!empty($_FILES)) {
+		// Loop through files
+		foreach ($_FILES as $key => $file) {
 
-		// Retrieve dataURL, format : data:image/png;base64,iVBORw0K...
-		$data_url_1 = $_POST['ph1-url'];
+			$tmp = explode('.', $file['name']);
+			$file_ext = strtolower(end($tmp));
 
-		// decode dataURL
-		$data_1 = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data_url_1));
+			// check file extension
+			if (in_array($file_ext, $extensions)) {
 
-		// save image in /storage folder
-		$img_name_1 = basename(htmlspecialchars($_FILES['ph1']['name'])); // image name
-		$ph1_tmp = __DIR__ . '/storage/' . $img_name_1; // image path
-		file_put_contents($ph1_tmp, $data_1); //store image
+				$storage_path = __DIR__ . "/images/" . $key . "_" . $id_annonce . "." . $file_ext;
 
-		echo $id_annonce . "<br />";
-		echo $ph1_tmp . "<br />";
+				$file_tmp = $file['tmp_name'];
 
-		if (file_exists($ph1_tmp)) //si un fichier a été rentré par utilisateur
-		{
+				move_uploaded_file($file_tmp, $storage_path);
+				// upload_avatar($ph1_tmp, $storage_path);
 
-			$storage_path = __DIR__ . '/images/ph1_' . $id_annonce . '.jpg';
-			upload_avatar($ph1_tmp, $storage_path);
+			}
+
 		}
 
 	}
 
-// same treatment for second image
-	if (isset($_POST['ph2-url'])) {
-		// Retrieve dataURL, format : data:image/png;base64,iVBORw0K...
-		$data_url_2 = $_POST['ph2-url'];
-
-		// decode dataURL
-		$data_2 = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data_url_2));
-
-		// save image in /storage folder
-		$img_name_2 = basename(htmlspecialchars($_FILES['ph2']['name'])); // image name
-		$ph2_tmp = __DIR__ . '/storage/' . $img_name_2;
-		file_put_contents($ph2_tmp, $data_2); // store image
-
-		// ADD IMAGE TREATMENT THERE
-
-		echo $id_annonce . "<br />";
-		echo $ph2_tmp . "<br />";
-
-		if (file_exists($ph2_tmp)) //si un fichier a été rentré par utilisateur
-		{
-
-			$storage_path = __DIR__ . '/images/ph2_' . $id_annonce . '.jpg';
-			upload_avatar($ph2_tmp, $storage_path);
-			$ph2 = "ph2_" . $id_annonce;
-		}
-
-	}
 }
 
 ?>
@@ -140,59 +112,32 @@ if (isset($_POST['submit'])) //si on appuit sur "s'inscrire" qui a la valeur "su
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
 <script type='text/javascript' src='https://code.jquery.com/jquery-1.9.1.js'></script>
-<script src="js/load-image.all.min.js"></script>
-
 
 <script type="text/javascript">
 
 $(window).load(function () {
-	function addImg(event, dest, current) {
-		if (event.target.files && event.target.files[0]) {
-			var file = event.target.files[0]; // Our input file
 
-			loadImage(
-				file,
-				function (img, data) {
-					// check if image type is defined
-					if (img.type === "error") {
-						console.error("Error loading image " + file.name);
-					} else {
-						// img is a <canvas> element, we need to convert it to a data URL
-						var dataURL = img.toDataURL();
+function readURL(input, imgID) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
 
-						// modify image src in DOM
-						$(dest).attr("src", dataURL);
+    reader.onload = function(e) {
+      $(imgID).attr('src', e.target.result);
+    }
 
-						// Add also an hidden input contaiing dataURL
-						var name = $(current).attr("name");
-						name += "-url";
+    reader.readAsDataURL(input.files[0]); // convert to base64 string
+  }
+}
 
-						if ($("input[name*='" + name + "'").length) {
-							// if hiddent input already exists
-							//console.log($("input[name*='"+name+"'").attr('name'));
-							$("input[name*='" + name + "'").remove();
-						}
+$("#imgInp").change(function() {
+  readURL(this, "#img1");
+});
 
-						$(current).after(
-							`<input type='hidden' name='${name}' value='${dataURL}' />`
-						);
-					}
-				},
-				{
-					orientation: true,
-					maxWidth: 200,
-				}
-			);
-		}
-	}
+$("#imgInp2").change(function() {
+  readURL(this, "#img2");
+});
 
-	// add event listener to our form inputs
-	$("#imgInp").change(function (e) {
-		addImg(e, "#blah", this);
-	});
-	$("#imgInp2").change(function (e) {
-		addImg(e, "#blah2", this);
-	});
+
 });
 </script>
 
@@ -226,22 +171,22 @@ margin-top:5px
 
 <body>
 
-<form id="form1" method="post" action="" enctype="multipart/form-data" >
+<form id="form1" method="post" action="" enctype="multipart/form-data">
 
-<p class="p_form">
-<label class="l_1">Photo n°1</label>
-<input type='file' id="imgInp" value="test" name="ph1" data-url /><br />
-<img class="img_form" id="blah" src="#" alt="" />
-</p>
+	<p class="p_form">
+		<label class="l_1">Photo n°1</label>
+		<input type='file' id="imgInp" name="ph1" /><br />
+		<img class="img_form" id="img1" src="#" alt="" />
+	</p>
 
-<p class="p_form">
-<label class="l_1">Photo n°2</label>
-<input type='file' id="imgInp2" value="test" name="ph2" data-url /><br />
-<img class="img_form" id="blah2" src="#" alt="" />
-</p>
+	<p class="p_form">
+		<label class="l_1">Photo n°2</label>
+		<input type='file' id="imgInp2" name="ph2" /><br />
+		<img class="img_form" id="img2" src="#" alt="" />
+	</p>
 
-<p>
-<button style="width:150px;margin-top: 5px;margin-bottom:5px;font-family: Lato;color: white;background: rgb(0, 148, 222);" type="submit" name="submit">Valider</button>
+	<p>
+		<button style="width:150px;margin-top: 5px;margin-bottom:5px;font-family: Lato;color: white;background: rgb(0, 148, 222);" type="submit" name="submit" value="submit_files">Valider</button>
     </p>
 
 </form>
