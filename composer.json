@@ -1,0 +1,12 @@
+{
+    "name": "moi/form-exif",
+    "authors": [
+        {
+            "name": "pierre travacca",
+            "email": "pierre.travacca@gmail.com"
+        }
+    ],
+      "require": {
+        "gumlet/php-image-resize": "1.9.*"
+    }
+}
