@@ -2,8 +2,9 @@
 session_start();
 
 require_once __DIR__ . '/vendor/autoload.php';
-use \Gumlet\ImageResize;
 
+use Gumlet\ImageResize;
+use lsolesen\pel\PelJpeg;
 /**
  * Handle images form submit
  */
@@ -29,9 +30,21 @@ if (isset($_POST["submit"])) {
 
 				$file_tmp = $file['tmp_name'];
 
+				// get exif data
+				$jpeg = new PelJpeg($file_tmp);
+				$exif = $jpeg->getExif();
+
+				// resize image
 				$image = new ImageResize($file_tmp);
 				$image->resizeToBestFit(609, 455);
-				$image->save($storage_path);
+				$image->save($storage_path, IMAGETYPE_JPEG);
+
+				// add exif to output image
+				if (isset($exif) && !empty($exif)) {
+					$jpeg = new PelJpeg($storage_path);
+					$jpeg->setExif($exif);
+					$jpeg->saveFile($storage_path);
+				}
 
 			}
 
