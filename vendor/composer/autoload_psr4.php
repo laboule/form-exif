@@ -6,6 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'lsolesen\\pel\\' => array($vendorDir . '/lsolesen/pel/src'),
     'Gumlet\\' => array($vendorDir . '/gumlet/php-image-resize/lib'),
 );

@@ -25,7 +25,7 @@ if (isset($_POST["submit"])) {
 			if (in_array($file_ext, $extensions)) {
 
 				// Store and resize image
-				$storage_path = __DIR__ . "/images/" . $input_name . "_" . $id_annonce . "." . $file_ext;
+				$storage_path = __DIR__ . "/images/" . $input_name . "_" . $id_annonce . ".jpg";
 
 				$file_tmp = $file['tmp_name'];
 
